@@ -331,6 +331,27 @@
   .rv-note .d { font-size:11px; color:var(--muted); font-weight:600; margin-bottom:4px; }
   .rv-note .t { font-size:14px; }
   .rv-empty { color:var(--muted); font-size:14px; text-align:center; padding:10px 0; }
+
+  /* Calendar tab */
+  .cal2-card { background:var(--glass); border:1px solid var(--line); border-radius:24px; padding:16px 16px 18px; box-shadow:var(--shadow); margin:18px 0 14px; }
+  .cal2-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+  .cal2-top button { width:38px; height:38px; border-radius:12px; border:1px solid var(--line); background:#fff; color:var(--accent-deep); font-size:18px; cursor:pointer; }
+  .cal2-top button:active { transform:scale(.94); }
+  .cal2-title { font-weight:600; font-size:16px; }
+  .cal2-dow { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; margin-bottom:6px; }
+  .cal2-dow span { text-align:center; font-size:10px; font-weight:600; color:var(--muted); text-transform:uppercase; }
+  .cal2-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; }
+  .cal2-cell { aspect-ratio:1; border-radius:11px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px; font-size:13px; font-weight:600; color:var(--text); cursor:pointer; transition:background .2s ease, color .2s ease; }
+  .cal2-cell.empty { cursor:default; }
+  .cal2-cell.today { background:rgba(47,93,79,.1); color:var(--accent-deep); }
+  .cal2-cell.sel { background:var(--accent); color:#fff; }
+  .cal2-cell:not(.empty):active { transform:scale(.92); }
+  .cal2-cell .dot { width:5px; height:5px; border-radius:50%; background:var(--amber); }
+  .cal2-cell.sel .dot { background:#fff; }
+  .cal2-note { background:var(--glass); border:1px solid var(--line); border-radius:20px; padding:16px; box-shadow:var(--shadow); }
+  .cal2-note-head { font-weight:600; font-size:15px; margin-bottom:10px; color:var(--accent-deep); }
+  .cal2-note textarea { width:100%; background:rgba(255,255,255,.6); border:1px solid var(--line); border-radius:13px; padding:12px; font:inherit; font-size:14px; color:var(--text); min-height:120px; resize:none; -webkit-user-select:text; user-select:text; }
+  .cal2-note textarea:focus { outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(47,93,79,.14); }
 </style>
 </head>
 <body>
@@ -471,9 +492,33 @@
   </div>
 </div><!-- /view-review -->
 
+<div id="view-calendar" hidden>
+  <header>
+    <h1>Calendar</h1>
+    <div class="cheer">Mark your moments 🌿</div>
+    <div class="sub">Tap any day to add a note</div>
+  </header>
+
+  <section class="cal2-card">
+    <div class="cal2-top">
+      <button id="calPrev" aria-label="Previous month">‹</button>
+      <div class="cal2-title" id="calTitle">Month</div>
+      <button id="calNext" aria-label="Next month">›</button>
+    </div>
+    <div class="cal2-dow"><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span><span>Su</span></div>
+    <div class="cal2-grid" id="calGrid"></div>
+  </section>
+
+  <section class="cal2-note">
+    <div class="cal2-note-head" id="calNoteDate">Today</div>
+    <textarea id="calNoteText" placeholder="Special notes for this day — appointments, milestones, anything…"></textarea>
+  </section>
+</div><!-- /view-calendar -->
+
 <nav class="tabbar">
   <button id="tab-challenge" class="active"><span class="ic">🌿</span>Challenge</button>
   <button id="tab-meals"><span class="ic">🍽️</span>Meals</button>
+  <button id="tab-calendar"><span class="ic">📅</span>Calendar</button>
   <button id="tab-review"><span class="ic">📈</span>Review</button>
 </nav>
 
@@ -753,6 +798,7 @@ function backupData() {
     app: "21-day-health", version: 1, exportedAt: new Date().toISOString(),
     h21_v1: localStorage.getItem("h21_v1"),
     meal_v1: localStorage.getItem("meal_v1"),
+    cal_v1: localStorage.getItem("cal_v1"),
     h21_tab: localStorage.getItem("h21_tab"),
   };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
@@ -772,6 +818,7 @@ function restoreData(file) {
       if (!confirm("Restore this backup? It will replace your current data on this device.")) return;
       if (d.h21_v1 != null) localStorage.setItem("h21_v1", d.h21_v1);
       if (d.meal_v1 != null) localStorage.setItem("meal_v1", d.meal_v1);
+      if (d.cal_v1 != null) localStorage.setItem("cal_v1", d.cal_v1);
       if (d.h21_tab != null) localStorage.setItem("h21_tab", d.h21_tab);
       alert("Restored ✓  Reloading…");
       location.reload();
@@ -1071,23 +1118,61 @@ function renderReview() {
   });
 }
 
+/* ====================================================================
+   CALENDAR  (date-based special notes)
+   ==================================================================== */
+const CAL_KEY = "cal_v1";
+let calNotes = (() => { try { return JSON.parse(localStorage.getItem(CAL_KEY)) || null; } catch { return null; } })() || {};
+function saveCal() { localStorage.setItem(CAL_KEY, JSON.stringify(calNotes)); }
+
+let calView = new Date(); calView.setHours(0,0,0,0); calView.setDate(1);  // first of displayed month
+let calSelKey = keyForDate(new Date());
+
+function renderCalendar() {
+  const year = calView.getFullYear(), month = calView.getMonth();
+  $("#calTitle").textContent = calView.toLocaleDateString(undefined, { month:"long", year:"numeric" });
+  const startDow = (new Date(year, month, 1).getDay() + 6) % 7;   // Monday = 0
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const todayKey = keyForDate(new Date());
+  const grid = $("#calGrid"); grid.innerHTML = "";
+  for (let i = 0; i < startDow; i++) { const e = document.createElement("div"); e.className = "cal2-cell empty"; grid.appendChild(e); }
+  for (let d = 1; d <= daysInMonth; d++) {
+    const key = keyForDate(new Date(year, month, d));
+    const cell = document.createElement("div");
+    cell.className = "cal2-cell" + (key === todayKey ? " today" : "") + (key === calSelKey ? " sel" : "");
+    cell.innerHTML = `<span>${d}</span>` + (calNotes[key] ? `<span class="dot"></span>` : "");
+    cell.onclick = () => { calSelKey = key; renderCalendar(); };
+    grid.appendChild(cell);
+  }
+  renderCalNote();
+}
+function renderCalNote() {
+  const [y, m, dd] = calSelKey.split("-").map(Number);
+  const date = new Date(y, m - 1, dd);
+  const full = date.toLocaleDateString(undefined, { weekday:"long", month:"long", day:"numeric" });
+  $("#calNoteDate").textContent = (calSelKey === keyForDate(new Date()) ? "Today · " : "") + full;
+  const ta = $("#calNoteText");
+  ta.value = calNotes[calSelKey] || "";
+  ta.oninput = () => { if (ta.value.trim()) calNotes[calSelKey] = ta.value; else delete calNotes[calSelKey]; saveCal(); };
+}
+$("#calPrev").onclick = () => { calView.setMonth(calView.getMonth() - 1); renderCalendar(); };
+$("#calNext").onclick = () => { calView.setMonth(calView.getMonth() + 1); renderCalendar(); };
+
 // ---- Tab switching ----------------------------------------------------
+const TABS = ["challenge", "meals", "calendar", "review"];
 function showTab(name) {
-  $("#view-challenge").hidden = name !== "challenge";
-  $("#view-meals").hidden = name !== "meals";
-  $("#view-review").hidden = name !== "review";
-  $("#tab-challenge").classList.toggle("active", name === "challenge");
-  $("#tab-meals").classList.toggle("active", name === "meals");
-  $("#tab-review").classList.toggle("active", name === "review");
+  TABS.forEach(t => {
+    $("#view-" + t).hidden = name !== t;
+    $("#tab-" + t).classList.toggle("active", name === t);
+  });
   localStorage.setItem("h21_tab", name);
   if (name === "meals") renderMeals();
+  if (name === "calendar") renderCalendar();
   if (name === "review") renderReview();
   window.scrollTo(0, 0);
 }
-$("#tab-challenge").onclick = () => showTab("challenge");
-$("#tab-meals").onclick = () => showTab("meals");
-$("#tab-review").onclick = () => showTab("review");
-showTab(["meals", "review"].includes(localStorage.getItem("h21_tab")) ? localStorage.getItem("h21_tab") : "challenge");
+TABS.forEach(t => { $("#tab-" + t).onclick = () => showTab(t); });
+showTab(TABS.includes(localStorage.getItem("h21_tab")) ? localStorage.getItem("h21_tab") : "challenge");
 
 // ---- Service worker (offline) ----------------------------------------
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(()=>{});
