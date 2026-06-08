@@ -97,6 +97,16 @@
   .habit .emoji { font-size: 18px; }
   .habit.on .label { color: var(--muted); text-decoration: line-through; }
 
+  .priority {
+    display:flex; align-items:center; gap: 10px; margin: 0 0 16px; padding: 12px 14px;
+    background: rgba(251,191,36,.08); border:1px solid rgba(251,191,36,.35); border-radius: 14px;
+  }
+  .priority .star { font-size: 18px; flex: 0 0 auto; }
+  .priority input {
+    flex: 1; background: transparent; border: none; outline: none; color: var(--text);
+    font: inherit; font-size: 15px; font-weight: 600; -webkit-user-select: text; user-select: text;
+  }
+  .priority input::placeholder { color: var(--muted); font-weight: 500; }
   .field-label { display:block; margin: 14px 0 6px; font-size: 13px; font-weight: 600; color: var(--muted); }
   textarea {
     width: 100%; background: rgba(0,0,0,.25); color: var(--text);
@@ -163,6 +173,10 @@
 <section class="today-card">
   <h2 id="dayTitle">Day 1</h2>
   <div class="focus" id="dayFocus">Today's focus</div>
+  <div class="priority">
+    <span class="star">⭐</span>
+    <input id="priority" type="text" placeholder="Today's #1 priority…" autocomplete="off" />
+  </div>
   <div class="habits" id="habits"></div>
   <label class="field-label" for="reflect">📝 Reflection</label>
   <textarea id="reflect" placeholder="How did today go? One thought…"></textarea>
@@ -222,7 +236,7 @@ function currentDayNum() {
 let viewDay = currentDayNum();
 
 function dayData(n) {
-  if (!state.days[n]) state.days[n] = { habits: {}, reflect: "", grateful: "" };
+  if (!state.days[n]) state.days[n] = { habits: {}, priority: "", reflect: "", grateful: "" };
   return state.days[n];
 }
 function isDayComplete(n) {
@@ -297,6 +311,10 @@ function renderDay() {
     wrap.appendChild(row);
   });
   wrap.dataset.complete = isDayComplete(n) ? "1" : "0";
+
+  const priority = $("#priority");
+  priority.value = d.priority || "";
+  priority.oninput = () => { d.priority = priority.value; save(state); };
 
   const reflect = $("#reflect");
   reflect.value = d.reflect || "";
