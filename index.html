@@ -69,7 +69,8 @@
   .cell:active { transform: scale(.92); }
   .cell.done { background: linear-gradient(160deg, var(--teal), var(--teal-deep)); color:#04201c; border-color: transparent; }
   .cell.today { outline: 2px solid var(--teal); outline-offset: 1px; }
-  .cell.locked { opacity: .45; }
+  .cell.viewing { box-shadow: inset 0 0 0 2px var(--text); }
+  .cell.locked { opacity: .4; cursor: default; }
 
   /* Today card */
   .today-card {
@@ -229,11 +230,14 @@ if (!state) {
 }
 
 // current day number based on calendar; clamp 1..21
-function currentDayNum() {
-  const diff = Math.floor((todayStr() - state.start) / DAY_MS);
-  return Math.min(Math.max(diff + 1, 1), TOTAL);
+// Self-paced: the "active" day is the first day you haven't completed yet.
+function activeDay() {
+  for (let i = 1; i <= TOTAL; i++) if (!isDayComplete(i)) return i;
+  return TOTAL;
 }
-let viewDay = currentDayNum();
+// A day is reachable if it's at/before the active day, or already completed.
+function unlocked(n) { return n >= 1 && n <= TOTAL && (n <= activeDay() || isDayComplete(n)); }
+let viewDay = activeDay();
 
 function dayData(n) {
   if (!state.days[n]) state.days[n] = { habits: {}, priority: "", reflect: "", grateful: "" };
@@ -270,15 +274,16 @@ function renderHero() {
 function renderGrid() {
   const grid = $("#grid");
   grid.innerHTML = "";
-  const cur = currentDayNum();
+  const active = activeDay();
   for (let i=1;i<=TOTAL;i++){
     const c = document.createElement("div");
     c.className = "cell";
     c.textContent = i;
     if (isDayComplete(i)) c.classList.add("done");
-    if (i === cur) c.classList.add("today");
-    if (i > cur) c.classList.add("locked");
-    c.onclick = () => { if (i <= cur) { viewDay = i; renderDay(); } };
+    if (i === active) c.classList.add("today");
+    if (i === viewDay) c.classList.add("viewing");
+    if (!unlocked(i)) c.classList.add("locked");
+    c.onclick = () => { if (unlocked(i)) { viewDay = i; renderDay(); renderGrid(); } };
     grid.appendChild(c);
   }
 }
@@ -287,12 +292,12 @@ const check = '<svg viewBox="0 0 24 24" fill="none"><path d="M5 12l5 5L20 7" str
 
 function renderDay() {
   const n = viewDay;
-  const cur = currentDayNum();
+  const active = activeDay();
   $("#dayLabel").textContent = "Day " + n;
-  $("#dayTitle").textContent = "Day " + n + (n === cur ? " · Today" : "");
+  $("#dayTitle").textContent = "Day " + n + (n === active ? " · Today" : (isDayComplete(n) ? " · Done ✓" : ""));
   $("#dayFocus").textContent = FOCUS[n-1];
   $("#prev").disabled = n <= 1;
-  $("#next").disabled = n >= cur; // can't view future days
+  $("#next").disabled = !unlocked(n + 1);
 
   const d = dayData(n);
   const wrap = $("#habits");
@@ -302,15 +307,20 @@ function renderDay() {
     row.className = "habit" + (d.habits[h.id] ? " on" : "");
     row.innerHTML = `<div class="box">${check}</div><span class="emoji">${h.emoji}</span><span class="label">${h.label}</span>`;
     row.onclick = () => {
+      const wasComplete = isDayComplete(n);
       d.habits[h.id] = !d.habits[h.id];
       save(state);
-      const wasComplete = row.parentElement.dataset.complete === "1";
-      renderDay(); renderGrid(); renderHero();
-      if (isDayComplete(n) && !wasComplete) celebrate();
+      renderHero(); renderGrid(); renderDay();
+      if (isDayComplete(n) && !wasComplete) {
+        celebrate();
+        // Self-paced: jump to the next day once today is done.
+        if (n < TOTAL) {
+          setTimeout(() => { viewDay = n + 1; renderDay(); renderGrid(); }, 850);
+        }
+      }
     };
     wrap.appendChild(row);
   });
-  wrap.dataset.complete = isDayComplete(n) ? "1" : "0";
 
   const priority = $("#priority");
   priority.value = d.priority || "";
@@ -336,8 +346,8 @@ function celebrate() {
   setTimeout(() => t.classList.remove("show"), 1600);
 }
 
-$("#prev").onclick = () => { if (viewDay > 1) { viewDay--; renderDay(); } };
-$("#next").onclick = () => { if (viewDay < currentDayNum()) { viewDay++; renderDay(); } };
+$("#prev").onclick = () => { if (viewDay > 1) { viewDay--; renderDay(); renderGrid(); } };
+$("#next").onclick = () => { if (unlocked(viewDay + 1)) { viewDay++; renderDay(); renderGrid(); } };
 
 $("#reset").onclick = () => {
   if (confirm("Reset the whole challenge and start over from Day 1?")) {
@@ -348,9 +358,8 @@ $("#reset").onclick = () => {
 
 function renderDateRange() {
   const start = new Date(state.start);
-  const end = new Date(state.start + (TOTAL-1)*DAY_MS);
   const fmt = d => d.toLocaleDateString(undefined, { month:"short", day:"numeric" });
-  $("#dateRange").textContent = fmt(start) + " – " + fmt(end);
+  $("#dateRange").textContent = "Started " + fmt(start) + " · go at your own pace";
 }
 
 function renderAll() { renderHero(); renderGrid(); renderDay(); renderDateRange(); }
