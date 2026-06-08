@@ -292,6 +292,47 @@
   .food-item .fk { color:var(--muted); font-size:14px; font-variant-numeric:tabular-nums; }
   .food-item .del { background:none; border:none; color:var(--muted); font-size:20px; line-height:1; cursor:pointer; padding:0 2px; }
   .empty-meals { text-align:center; color:var(--muted); padding:34px 16px; font-size:14px; }
+
+  /* Edit habits link + modal */
+  .edit-habits-link { display:block; margin:12px auto 0; background:none; border:none; color:var(--accent-deep); font:inherit; font-size:13px; font-weight:600; cursor:pointer; }
+  .modal-overlay { position:fixed; inset:0; z-index:80; background:rgba(40,46,44,.4); backdrop-filter:blur(3px); display:flex; align-items:flex-end; justify-content:center; }
+  .modal-overlay[hidden] { display:none; }
+  .modal { width:100%; max-width:560px; background:var(--bg1); border-radius:24px 24px 0 0; padding:18px 18px calc(20px + env(safe-area-inset-bottom)); max-height:86vh; overflow-y:auto; box-shadow:0 -10px 40px rgba(40,46,44,.2); }
+  .modal-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+  .modal-head h3 { margin:0; font-size:17px; }
+  .modal-x { background:none; border:none; font-size:18px; color:var(--muted); cursor:pointer; }
+  .hedit { display:flex; align-items:center; gap:7px; margin-bottom:9px; }
+  .hedit input { background:var(--card); border:1px solid var(--line); border-radius:11px; padding:10px; font:inherit; font-size:15px; color:var(--text); -webkit-user-select:text; user-select:text; }
+  .hedit input:focus { outline:none; border-color:var(--accent); }
+  .hedit .hemoji { width:48px; text-align:center; flex:0 0 auto; }
+  .hedit .hlabel { flex:1; min-width:0; }
+  .hedit .hmove, .hedit .hdel { width:34px; height:38px; flex:0 0 auto; background:var(--card); border:1px solid var(--line); border-radius:10px; color:var(--accent-deep); font-size:14px; cursor:pointer; }
+  .hedit .hmove:disabled { opacity:.3; }
+  .hedit .hdel { color:#b15b53; }
+  .add-habit { width:100%; margin:6px 0 16px; background:rgba(47,93,79,.08); border:1px dashed var(--accent); border-radius:13px; padding:12px; color:var(--accent-deep); font:inherit; font-weight:600; font-size:14px; cursor:pointer; }
+  .modal-foot { display:flex; }
+  .modal-save { flex:1; background:var(--accent); color:#fff; border:none; border-radius:14px; padding:14px; font:inherit; font-weight:600; font-size:15px; cursor:pointer; }
+
+  /* Review tab */
+  .review-hero { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .review-hero .stat { text-align:center; }
+  .review-hero .stat .n { font-size:26px; }
+  #rvCurrent, #rvBest { color:var(--amber-deep); }
+  .review-card { background:var(--glass); border:1px solid var(--line); border-radius:20px; padding:16px 18px; box-shadow:var(--shadow); margin-bottom:14px; }
+  .review-card h3 { margin:0 0 14px; font-size:14px; }
+  .hstat { margin-bottom:13px; }
+  .hstat:last-child { margin-bottom:0; }
+  .hstat-top { display:flex; justify-content:space-between; font-size:14px; margin-bottom:5px; }
+  .hstat-top .hc { color:var(--muted); font-variant-numeric:tabular-nums; }
+  .hstat-bar { height:8px; background:var(--line); border-radius:999px; overflow:hidden; }
+  .hstat-fill { height:100%; background:linear-gradient(90deg,var(--sage),var(--sage-deep)); border-radius:999px; transition:width .5s cubic-bezier(.25,1,.4,1); }
+  .nutri-row { display:flex; justify-content:space-between; padding:8px 0; border-top:1px solid var(--line); font-size:14px; }
+  .nutri-row:first-child { border-top:none; }
+  .nutri-row strong { color:var(--accent-deep); }
+  .rv-note { background:rgba(255,255,255,.5); border:1px solid var(--line); border-radius:13px; padding:11px 13px; margin-bottom:9px; }
+  .rv-note .d { font-size:11px; color:var(--muted); font-weight:600; margin-bottom:4px; }
+  .rv-note .t { font-size:14px; }
+  .rv-empty { color:var(--muted); font-size:14px; text-align:center; padding:10px 0; }
 </style>
 </head>
 <body>
@@ -340,6 +381,7 @@
   <textarea id="meal" placeholder="Breakfast · Lunch · Dinner · Snacks…"></textarea>
 
   <div class="habits" id="habits"></div>
+  <button class="edit-habits-link" id="editHabits">✏️ Edit my habits</button>
 
   <label class="field-label" for="reflect">📝 Notes</label>
   <textarea id="reflect" placeholder="Notes for today — how it went, anything to remember…"></textarea>
@@ -399,10 +441,58 @@
   <div id="mealList"></div>
 </div><!-- /view-meals -->
 
+<div id="view-review" hidden>
+  <header>
+    <h1>Your Review</h1>
+    <div class="cheer">Look how far you've come 🌿</div>
+    <div class="sub" id="reviewSub">A snapshot of your progress</div>
+  </header>
+
+  <section class="hero review-hero">
+    <div class="stat"><div class="n" id="rvDone">0<span style="font-size:13px;color:var(--muted)">/21</span></div><div class="l">Days done</div></div>
+    <div class="stat"><div class="n" id="rvPct">0%</div><div class="l">Complete</div></div>
+    <div class="stat"><div class="n" id="rvCurrent">0</div><div class="l">Current streak</div></div>
+    <div class="stat"><div class="n" id="rvBest">0</div><div class="l">Best streak</div></div>
+  </section>
+
+  <div class="review-card">
+    <h3>Habit consistency</h3>
+    <div id="habitStats"></div>
+  </div>
+
+  <div class="review-card">
+    <h3>Nutrition this week</h3>
+    <div class="nutri-row"><span>Total</span><strong id="rvWeekTotal">0 kcal</strong></div>
+    <div class="nutri-row"><span>Daily average</span><strong id="rvWeekAvg">0 kcal</strong></div>
+    <div class="nutri-row"><span>Days logged</span><strong id="rvWeekDays">0 / 7</strong></div>
+  </div>
+
+  <div class="review-card" id="reviewNotesCard">
+    <h3>Recent notes</h3>
+    <div id="reviewNotes"></div>
+  </div>
+</div><!-- /view-review -->
+
 <nav class="tabbar">
   <button id="tab-challenge" class="active"><span class="ic">🌿</span>Challenge</button>
   <button id="tab-meals"><span class="ic">🍽️</span>Meals</button>
+  <button id="tab-review"><span class="ic">📈</span>Review</button>
 </nav>
+
+<!-- Habit editor modal -->
+<div class="modal-overlay" id="habitModal" hidden>
+  <div class="modal">
+    <div class="modal-head">
+      <h3>Edit my habits</h3>
+      <button class="modal-x" id="habitClose" aria-label="Close">✕</button>
+    </div>
+    <div class="modal-body" id="habitEditList"></div>
+    <button class="add-habit" id="addHabit">+ Add a habit</button>
+    <div class="modal-foot">
+      <button class="modal-save" id="habitSave">Done</button>
+    </div>
+  </div>
+</div>
 
 <div class="toast" id="toast"></div>
 <canvas id="fx" class="fx"></canvas>
@@ -900,20 +990,110 @@ $("#mGoal").addEventListener("input", () => {
 $("#mPrev").onclick = () => { mealOffset--; renderMeals(); };
 $("#mNext").onclick = () => { if (mealOffset < 0) { mealOffset++; renderMeals(); } };
 
+/* ====================================================================
+   HABIT EDITOR  (customize your own habits)
+   ==================================================================== */
+let editHabits = null;
+function openHabitEditor() { editHabits = HABITS.map(h => ({ ...h })); renderHabitEditor(); $("#habitModal").hidden = false; }
+function renderHabitEditor() {
+  const wrap = $("#habitEditList"); wrap.innerHTML = "";
+  editHabits.forEach((h, i) => {
+    const row = document.createElement("div"); row.className = "hedit";
+    const emoji = document.createElement("input"); emoji.className = "hemoji"; emoji.value = h.emoji || ""; emoji.maxLength = 2;
+    const label = document.createElement("input"); label.className = "hlabel"; label.value = h.label || ""; label.placeholder = "Habit name";
+    const up = document.createElement("button"); up.className = "hmove"; up.textContent = "↑"; up.disabled = i === 0;
+    const down = document.createElement("button"); down.className = "hmove"; down.textContent = "↓"; down.disabled = i === editHabits.length - 1;
+    const del = document.createElement("button"); del.className = "hdel"; del.textContent = "✕";
+    emoji.oninput = () => editHabits[i].emoji = emoji.value;
+    label.oninput = () => editHabits[i].label = label.value;
+    up.onclick = () => { [editHabits[i-1], editHabits[i]] = [editHabits[i], editHabits[i-1]]; renderHabitEditor(); };
+    down.onclick = () => { [editHabits[i+1], editHabits[i]] = [editHabits[i], editHabits[i+1]]; renderHabitEditor(); };
+    del.onclick = () => { if (editHabits.length <= 1) { alert("Keep at least one habit."); return; } editHabits.splice(i, 1); renderHabitEditor(); };
+    row.append(emoji, label, up, down, del);
+    wrap.appendChild(row);
+  });
+}
+function addHabitRow() { editHabits.push({ id: "h" + Date.now() + "_" + editHabits.length, emoji: "✅", label: "" }); renderHabitEditor(); }
+function saveHabits() {
+  const cleaned = editHabits.map(h => ({ id: h.id, emoji: (h.emoji || "").trim() || "•", label: (h.label || "").trim() })).filter(h => h.label);
+  if (!cleaned.length) { alert("Add at least one habit."); return; }
+  state.habits = cleaned; save(state); HABITS = state.habits;
+  $("#habitModal").hidden = true;
+  renderHero(); renderGrid(); renderDay();
+}
+$("#editHabits").onclick = openHabitEditor;
+$("#addHabit").onclick = addHabitRow;
+$("#habitSave").onclick = saveHabits;
+$("#habitClose").onclick = () => { $("#habitModal").hidden = true; };
+$("#habitModal").onclick = (e) => { if (e.target.id === "habitModal") $("#habitModal").hidden = true; };
+
+/* ====================================================================
+   REVIEW  (progress recap)
+   ==================================================================== */
+function currentStreak() { const a = activeDay(); return isDayComplete(a) ? a : a - 1; }
+function renderReview() {
+  const done = daysDone();
+  $("#rvDone").innerHTML = done + '<span style="font-size:13px;color:var(--muted)">/21</span>';
+  $("#rvPct").textContent = Math.round((done / TOTAL) * 100) + "%";
+  $("#rvCurrent").textContent = currentStreak();
+  $("#rvBest").textContent = streak();
+
+  // habit consistency across the days you've reached
+  const reached = Math.max(activeDay(), done);
+  const wrap = $("#habitStats"); wrap.innerHTML = "";
+  HABITS.forEach(h => {
+    let c = 0;
+    for (let i = 1; i <= reached; i++) if (state.days[i] && state.days[i].habits[h.id]) c++;
+    const pct = reached ? Math.round((c / reached) * 100) : 0;
+    const el = document.createElement("div"); el.className = "hstat";
+    el.innerHTML = `<div class="hstat-top"><span>${h.emoji} ${h.label}</span><span class="hc">${c}/${reached} days</span></div>`
+      + `<div class="hstat-bar"><div class="hstat-fill" style="width:${pct}%"></div></div>`;
+    wrap.appendChild(el);
+  });
+
+  // nutrition this week
+  const totals = weekDates().map(d => dayTotalFor(keyForDate(d)));
+  const weekTotal = totals.reduce((a, b) => a + b, 0);
+  const logged = totals.filter(t => t > 0).length;
+  $("#rvWeekTotal").textContent = weekTotal.toLocaleString() + " kcal";
+  $("#rvWeekAvg").textContent = (logged ? Math.round(weekTotal / logged) : 0).toLocaleString() + " kcal";
+  $("#rvWeekDays").textContent = logged + " / 7";
+
+  // recent notes (latest days with a note or gratitude)
+  const notes = $("#reviewNotes"); notes.innerHTML = "";
+  const collected = [];
+  for (let i = TOTAL; i >= 1 && collected.length < 4; i--) {
+    const d = state.days[i];
+    if (!d) continue;
+    const text = [d.reflect, d.grateful].filter(Boolean).join(" · ");
+    if (text) collected.push({ i, text, when: d.completedAt });
+  }
+  if (!collected.length) { notes.innerHTML = '<div class="rv-empty">Your notes and gratitude will show here.</div>'; }
+  else collected.forEach(n => {
+    const el = document.createElement("div"); el.className = "rv-note";
+    el.innerHTML = `<div class="d">Day ${n.i}${n.when ? " · " + fmtDate(n.when) : ""}</div>`;
+    const t = document.createElement("div"); t.className = "t"; t.textContent = n.text;
+    el.appendChild(t); notes.appendChild(el);
+  });
+}
+
 // ---- Tab switching ----------------------------------------------------
 function showTab(name) {
-  const onMeals = name === "meals";
-  $("#view-challenge").hidden = onMeals;
-  $("#view-meals").hidden = !onMeals;
-  $("#tab-challenge").classList.toggle("active", !onMeals);
-  $("#tab-meals").classList.toggle("active", onMeals);
+  $("#view-challenge").hidden = name !== "challenge";
+  $("#view-meals").hidden = name !== "meals";
+  $("#view-review").hidden = name !== "review";
+  $("#tab-challenge").classList.toggle("active", name === "challenge");
+  $("#tab-meals").classList.toggle("active", name === "meals");
+  $("#tab-review").classList.toggle("active", name === "review");
   localStorage.setItem("h21_tab", name);
-  if (onMeals) renderMeals();
+  if (name === "meals") renderMeals();
+  if (name === "review") renderReview();
   window.scrollTo(0, 0);
 }
 $("#tab-challenge").onclick = () => showTab("challenge");
 $("#tab-meals").onclick = () => showTab("meals");
-showTab(localStorage.getItem("h21_tab") === "meals" ? "meals" : "challenge");
+$("#tab-review").onclick = () => showTab("review");
+showTab(["meals", "review"].includes(localStorage.getItem("h21_tab")) ? localStorage.getItem("h21_tab") : "challenge");
 
 // ---- Service worker (offline) ----------------------------------------
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(()=>{});
