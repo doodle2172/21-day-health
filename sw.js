@@ -1,4 +1,4 @@
-const CACHE = "h21-v17";
+const CACHE = "h21-v18";
 const ASSETS = [
   "./",
   "./index.html",
@@ -20,10 +20,26 @@ self.addEventListener("activate", (e) => {
   );
 });
 
-// Cache-first, fall back to network — works fully offline once installed.
 self.addEventListener("fetch", (e) => {
-  if (e.request.method !== "GET") return;
+  const req = e.request;
+  if (req.method !== "GET") return;
+
+  const isHTML = req.mode === "navigate" || (req.headers.get("accept") || "").includes("text/html");
+
+  if (isHTML) {
+    // Network-first for the app shell so new versions show up immediately when online.
+    e.respondWith(
+      fetch(req).then((res) => {
+        const copy = res.clone();
+        caches.open(CACHE).then((c) => c.put("./index.html", copy));
+        return res;
+      }).catch(() => caches.match(req).then((hit) => hit || caches.match("./index.html")))
+    );
+    return;
+  }
+
+  // Cache-first for static assets (icons, manifest) — fast and offline-friendly.
   e.respondWith(
-    caches.match(e.request).then((hit) => hit || fetch(e.request).catch(() => caches.match("./index.html")))
+    caches.match(req).then((hit) => hit || fetch(req).catch(() => caches.match("./index.html")))
   );
 });
