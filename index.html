@@ -3,163 +3,203 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no" />
-<meta name="theme-color" content="#0f766e" />
+<meta name="theme-color" content="#f7f5f0" />
 <title>21-Day Health Challenge</title>
 <link rel="manifest" href="manifest.webmanifest" />
 <link rel="apple-touch-icon" href="icons/icon-180.png" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
 <meta name="apple-mobile-web-app-title" content="21 Days" />
 <style>
   :root {
-    --bg: #0b1220;
-    --card: #131c2e;
-    --card-2: #1a2640;
-    --teal: #2dd4bf;
-    --teal-deep: #0f766e;
-    --text: #e6edf6;
-    --muted: #8a99b3;
-    --good: #34d399;
-    --ring: #2a3754;
-    --gold: #fbbf24;
+    /* FOREST & LINEN — crisp, botanical, elegant. Gold = the motivating accent. */
+    --bg1: #f7f5f0;   /* linen        */
+    --bg2: #f1efe6;   /* warm linen   */
+    --bg3: #ecf0ea;   /* faint sage   */
+    --card: #ffffff;
+    --glass: rgba(255,255,255,.82);
+    --text: #2b2e2c;         /* charcoal     */
+    --muted: #7d877e;
+    --line: #e3e1d6;         /* warm border  */
+    --accent: #2f5d4f;       /* forest green */
+    --accent-deep: #234a3e;
+    --sage: #3f7a64;         /* lighter forest (done state) */
+    --sage-deep: #2f5d4f;
+    --amber: #b8924a;        /* motivating gold */
+    --amber-deep: #9c7836;
+    --shadow: 0 12px 32px rgba(47,93,79,.12);
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { margin: 0; padding: 0; }
   body {
-    background: radial-gradient(1200px 600px at 50% -10%, #16233d 0%, var(--bg) 60%);
+    background: linear-gradient(160deg, var(--bg1) 0%, var(--bg2) 50%, var(--bg3) 100%);
+    background-size: 180% 180%;
+    animation: drift 22s ease-in-out infinite;
     color: var(--text);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     min-height: 100vh;
-    padding: max(16px, env(safe-area-inset-top)) 16px calc(24px + env(safe-area-inset-bottom));
-    max-width: 560px;
-    margin: 0 auto;
-    -webkit-user-select: none;
-    user-select: none;
+    padding: max(18px, env(safe-area-inset-top)) 16px calc(28px + env(safe-area-inset-bottom));
+    max-width: 560px; margin: 0 auto;
+    -webkit-user-select: none; user-select: none;
   }
-  header { text-align: center; padding: 8px 0 4px; }
-  h1 { font-size: 22px; margin: 0; letter-spacing: .2px; }
-  .sub { color: var(--muted); font-size: 13px; margin-top: 4px; }
+  @keyframes drift {
+    0%   { background-position: 0% 0%; }
+    50%  { background-position: 100% 100%; }
+    100% { background-position: 0% 0%; }
+  }
+
+  header { text-align: center; padding: 6px 0 2px; }
+  h1 { font-size: 21px; margin: 0; font-weight: 600; letter-spacing: .2px; color: var(--text); }
+  .cheer { color: var(--accent-deep); font-size: 15px; font-weight: 600; margin-top: 8px; letter-spacing: .2px; }
+  .sub { color: var(--muted); font-size: 12.5px; margin-top: 5px; }
 
   /* Progress ring + stats */
   .hero {
     display: grid; grid-template-columns: auto 1fr; gap: 16px; align-items: center;
-    background: linear-gradient(160deg, var(--card-2), var(--card));
-    border: 1px solid var(--ring); border-radius: 20px; padding: 18px; margin: 16px 0;
+    background: var(--glass); backdrop-filter: blur(8px);
+    border: 1px solid var(--line); border-radius: 24px; padding: 18px; margin: 18px 0;
+    box-shadow: var(--shadow);
   }
-  .ring { position: relative; width: 96px; height: 96px; }
+  .ring { position: relative; width: 92px; height: 92px; }
   .ring svg { transform: rotate(-90deg); }
-  .ring .pct {
-    position: absolute; inset: 0; display: grid; place-items: center;
-    font-size: 22px; font-weight: 700;
-  }
+  #ringFill { transition: stroke-dashoffset 1s cubic-bezier(.25,1,.4,1); }
+  .ring .pct { position: absolute; inset: 0; display: grid; place-items: center; font-size: 21px; font-weight: 600; color: var(--accent-deep); }
   .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .stat { background: rgba(255,255,255,.03); border:1px solid var(--ring); border-radius: 14px; padding: 10px 12px; }
-  .stat .n { font-size: 20px; font-weight: 700; }
-  .stat .l { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing:.6px; }
-  .stat .n .flame { color: var(--gold); }
+  .stat { background: rgba(255,255,255,.5); border:1px solid var(--line); border-radius: 16px; padding: 11px 13px; }
+  .stat .n { font-size: 20px; font-weight: 600; color: var(--text); }
+  .stat .l { font-size: 10.5px; color: var(--muted); text-transform: uppercase; letter-spacing:.7px; margin-top: 2px; }
+  #statStreak { color: var(--amber-deep); font-weight: 700; }
+  .flame { display:inline-block; }
+  .flame.bump { animation: bump .6s ease; }
+  @keyframes bump { 0%{transform:scale(1)} 40%{transform:scale(1.3) rotate(-6deg)} 100%{transform:scale(1)} }
 
   /* Day grid */
-  .grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin: 4px 0 18px; }
+  .grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin: 2px 0 18px; }
   .cell {
-    aspect-ratio: 1; border-radius: 12px; border:1px solid var(--ring);
-    background: var(--card); display: grid; place-items: center;
+    aspect-ratio: 1; border-radius: 14px; border:1px solid var(--line);
+    background: rgba(255,255,255,.55); display: grid; place-items: center;
     font-size: 13px; font-weight: 600; color: var(--muted); cursor: pointer;
-    transition: transform .08s ease, background .2s ease;
+    transition: transform .12s ease, background .3s ease, color .3s ease;
   }
   .cell:active { transform: scale(.92); }
-  .cell.done { background: linear-gradient(160deg, var(--teal), var(--teal-deep)); color:#04201c; border-color: transparent; }
-  .cell.today { outline: 2px solid var(--teal); outline-offset: 1px; }
-  .cell.viewing { box-shadow: inset 0 0 0 2px var(--text); }
-  .cell.locked { opacity: .4; cursor: default; }
+  .cell.done { background: linear-gradient(160deg, var(--sage), var(--sage-deep)); color:#fff; border-color: transparent; box-shadow: 0 4px 12px rgba(127,171,152,.3); }
+  .cell.today { border-color: var(--accent); color: var(--accent-deep); }
+  .cell.viewing { box-shadow: 0 0 0 2px var(--accent) inset; }
+  .cell.locked { opacity: .45; cursor: default; }
+  .cell.justdone { animation: cellPop .6s ease; }
+  @keyframes cellPop { 0%{transform:scale(1)} 45%{transform:scale(1.18)} 100%{transform:scale(1)} }
+
+  /* Day navigation */
+  .nav { display:flex; align-items:center; justify-content: space-between; margin: 2px 0 12px; }
+  .nav button {
+    background: var(--glass); color: var(--accent-deep); border:1px solid var(--line);
+    width: 42px; height: 42px; border-radius: 14px; font-size: 18px; cursor:pointer;
+    box-shadow: var(--shadow); transition: opacity .2s ease, transform .1s ease;
+  }
+  .nav button:active { transform: scale(.94); }
+  .nav button:disabled { opacity:.3; box-shadow:none; }
+  .nav .dlabel { font-weight:600; font-size: 15px; color: var(--text); }
 
   /* Today card */
   .today-card {
-    background: linear-gradient(160deg, var(--card-2), var(--card));
-    border:1px solid var(--ring); border-radius: 20px; padding: 18px; margin-bottom: 16px;
+    background: var(--glass); backdrop-filter: blur(8px);
+    border:1px solid var(--line); border-radius: 24px; padding: 20px; margin-bottom: 16px;
+    box-shadow: var(--shadow);
   }
-  .today-card h2 { margin:0 0 2px; font-size: 16px; }
-  .today-card .focus { color: var(--teal); font-weight: 700; font-size: 18px; margin: 2px 0 14px; }
-
-  .habits { display: flex; flex-direction: column; gap: 10px; }
-  .habit {
-    display:flex; align-items:center; gap: 12px; padding: 12px 14px;
-    background: rgba(255,255,255,.03); border:1px solid var(--ring); border-radius: 14px; cursor:pointer;
-    transition: background .15s ease;
-  }
-  .habit:active { background: rgba(255,255,255,.06); }
-  .box {
-    width: 24px; height: 24px; border-radius: 8px; border:2px solid var(--ring);
-    display:grid; place-items:center; flex: 0 0 auto; transition: all .15s ease;
-  }
-  .habit.on .box { background: var(--good); border-color: var(--good); }
-  .box svg { width: 14px; height: 14px; opacity: 0; transition: opacity .15s; }
-  .habit.on .box svg { opacity: 1; }
-  .habit .label { font-size: 15px; }
-  .habit .emoji { font-size: 18px; }
-  .habit.on .label { color: var(--muted); text-decoration: line-through; }
+  .today-card.slide-r { animation: slideR .4s cubic-bezier(.25,1,.4,1); }
+  .today-card.slide-l { animation: slideL .4s cubic-bezier(.25,1,.4,1); }
+  @keyframes slideR { from{opacity:.3; transform: translateX(22px)} to{opacity:1; transform:none} }
+  @keyframes slideL { from{opacity:.3; transform: translateX(-22px)} to{opacity:1; transform:none} }
+  .today-card.breathe { animation: breathe 1.1s ease; }
+  @keyframes breathe { 0%{box-shadow:var(--shadow)} 45%{box-shadow:0 0 0 6px rgba(184,146,74,.3), 0 16px 40px rgba(47,93,79,.22)} 100%{box-shadow:var(--shadow)} }
+  .today-card h2 { margin:0 0 2px; font-size: 16px; font-weight: 600; }
+  .today-card .focus { color: var(--accent-deep); font-weight: 600; font-size: 18px; margin: 2px 0 16px; }
 
   .priority {
-    display:flex; align-items:center; gap: 10px; margin: 0 0 16px; padding: 12px 14px;
-    background: rgba(251,191,36,.08); border:1px solid rgba(251,191,36,.35); border-radius: 14px;
+    display:flex; align-items:center; gap: 10px; margin: 0 0 14px; padding: 13px 14px;
+    background: rgba(211,180,120,.12); border:1px solid rgba(211,180,120,.4); border-radius: 16px;
   }
-  .priority .star { font-size: 18px; flex: 0 0 auto; }
+  .priority .star { font-size: 17px; flex:0 0 auto; }
   .priority input {
-    flex: 1; background: transparent; border: none; outline: none; color: var(--text);
-    font: inherit; font-size: 15px; font-weight: 600; -webkit-user-select: text; user-select: text;
+    flex:1; background:transparent; border:none; outline:none; color: var(--text);
+    font: inherit; font-size: 15px; font-weight: 600; -webkit-user-select:text; user-select:text;
   }
   .priority input::placeholder { color: var(--muted); font-weight: 500; }
+
   .field-label { display:block; margin: 14px 0 6px; font-size: 13px; font-weight: 600; color: var(--muted); }
   textarea {
-    width: 100%; background: rgba(0,0,0,.25); color: var(--text);
-    border:1px solid var(--ring); border-radius: 12px; padding: 12px; font: inherit; font-size: 14px;
-    resize: none; min-height: 64px; -webkit-user-select: text; user-select: text;
+    width: 100%; background: rgba(255,255,255,.6); color: var(--text);
+    border:1px solid var(--line); border-radius: 14px; padding: 12px; font: inherit; font-size: 14px;
+    resize: none; min-height: 60px; -webkit-user-select: text; user-select: text;
+    transition: border-color .2s ease, box-shadow .2s ease;
   }
+  textarea:focus { outline:none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(136,166,196,.18); }
   textarea::placeholder { color: var(--muted); }
 
-  .nav { display:flex; align-items:center; justify-content: space-between; margin: 4px 0 10px; }
-  .nav button {
-    background: var(--card); color: var(--text); border:1px solid var(--ring);
-    width: 40px; height: 40px; border-radius: 12px; font-size: 18px; cursor:pointer;
+  .habits { display: flex; flex-direction: column; gap: 10px; margin-top: 4px; }
+  .habit {
+    display:flex; align-items:center; gap: 12px; padding: 13px 14px;
+    background: rgba(255,255,255,.5); border:1px solid var(--line); border-radius: 16px; cursor:pointer;
+    transition: background .3s ease, border-color .3s ease;
   }
-  .nav button:disabled { opacity:.35; }
-  .nav .dlabel { font-weight:700; font-size: 15px; }
+  .habit:active { transform: scale(.99); }
+  .habit.on { background: rgba(47,93,79,.08); border-color: rgba(47,93,79,.35); }
+  .box {
+    width: 26px; height: 26px; border-radius: 9px; border:2px solid var(--line);
+    display:grid; place-items:center; flex:0 0 auto; background:#fff;
+    transition: background .25s ease, border-color .25s ease;
+  }
+  .habit.on .box { background: var(--sage); border-color: var(--sage); }
+  .box svg { width: 15px; height: 15px; opacity: 0; transition: opacity .2s ease; }
+  .habit.on .box svg { opacity: 1; }
+  .habit.just .box { animation: settle .55s ease; }
+  .habit.just .emoji { animation: nudge .55s ease; }
+  @keyframes settle { 0%{transform:scale(.7)} 55%{transform:scale(1.12)} 100%{transform:scale(1)} }
+  @keyframes nudge { 0%{transform:translateY(0)} 40%{transform:translateY(-4px)} 100%{transform:translateY(0)} }
+  .habit .emoji { font-size: 18px; }
+  .habit .label { font-size: 15px; transition: color .3s ease; }
+  .habit.on .label { color: var(--muted); }
 
   .complete-banner {
-    margin-top: 14px; text-align:center; padding: 12px; border-radius: 12px;
-    background: linear-gradient(160deg, var(--teal), var(--teal-deep)); color:#04201c; font-weight:700;
+    margin-top: 16px; text-align:center; padding: 12px; border-radius: 14px;
+    background: linear-gradient(160deg, var(--sage), var(--sage-deep)); color:#fff; font-weight:600;
     display:none;
   }
   .complete-banner.show { display:block; }
 
-  footer { text-align:center; margin-top: 8px; }
+  footer { text-align:center; margin-top: 10px; }
   .reset { background:none; border:none; color: var(--muted); font-size: 12px; text-decoration: underline; cursor:pointer; }
 
   .toast {
-    position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom)); transform: translateX(-50%) translateY(20px);
-    background: var(--good); color:#04201c; padding: 10px 18px; border-radius: 999px; font-weight:700;
-    opacity:0; transition: all .25s ease; pointer-events:none; z-index: 50;
+    position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom)); transform: translateX(-50%) translateY(16px);
+    background: var(--card); color: var(--accent-deep); padding: 11px 20px; border-radius: 999px; font-weight:600;
+    box-shadow: var(--shadow); border:1px solid var(--line);
+    opacity:0; transition: all .35s cubic-bezier(.25,1,.4,1); pointer-events:none; z-index: 60;
   }
   .toast.show { opacity:1; transform: translateX(-50%) translateY(0); }
+
+  .fx { position: fixed; inset:0; pointer-events:none; z-index: 50; }
 </style>
 </head>
 <body>
 <header>
   <h1>21-Day Health Challenge</h1>
-  <div class="sub" id="dateRange">Build the habit. One day at a time.</div>
+  <div class="cheer">Valen, you can do it 🌿</div>
+  <div class="sub" id="dateRange">Build the habit. One gentle day at a time.</div>
 </header>
 
 <section class="hero">
   <div class="ring">
-    <svg width="96" height="96" viewBox="0 0 96 96">
-      <circle cx="48" cy="48" r="42" fill="none" stroke="var(--ring)" stroke-width="8"/>
-      <circle id="ringFill" cx="48" cy="48" r="42" fill="none" stroke="var(--teal)" stroke-width="8"
+    <svg width="92" height="92" viewBox="0 0 96 96">
+      <circle cx="48" cy="48" r="42" fill="none" stroke="var(--line)" stroke-width="8"/>
+      <circle id="ringFill" cx="48" cy="48" r="42" fill="none" stroke="var(--accent)" stroke-width="8"
               stroke-linecap="round" stroke-dasharray="263.9" stroke-dashoffset="263.9"/>
     </svg>
     <div class="pct" id="ringPct">0%</div>
   </div>
   <div class="stats">
     <div class="stat"><div class="n" id="statDays">0<span style="font-size:13px;color:var(--muted)">/21</span></div><div class="l">Days done</div></div>
-    <div class="stat"><div class="n"><span class="flame">🔥</span> <span id="statStreak">0</span></div><div class="l">Streak</div></div>
+    <div class="stat"><div class="n"><span class="flame">🌿</span> <span id="statStreak">0</span></div><div class="l">Streak</div></div>
   </div>
 </section>
 
@@ -171,19 +211,27 @@
   <button id="next" aria-label="Next day">›</button>
 </div>
 
-<section class="today-card">
+<section class="today-card" id="todayCard">
   <h2 id="dayTitle">Day 1</h2>
   <div class="focus" id="dayFocus">Today's focus</div>
+
   <div class="priority">
     <span class="star">⭐</span>
     <input id="priority" type="text" placeholder="Today's #1 priority…" autocomplete="off" />
   </div>
+
+  <label class="field-label" for="meal">🍽️ What I plan to eat today</label>
+  <textarea id="meal" placeholder="Breakfast · Lunch · Dinner · Snacks…"></textarea>
+
   <div class="habits" id="habits"></div>
+
   <label class="field-label" for="reflect">📝 Reflection</label>
   <textarea id="reflect" placeholder="How did today go? One thought…"></textarea>
+
   <label class="field-label" for="grateful">🙏 One thing I'm grateful for</label>
   <textarea id="grateful" placeholder="Today I'm grateful for…"></textarea>
-  <div class="complete-banner" id="banner">🎉 Day complete — nice work!</div>
+
+  <div class="complete-banner" id="banner">🌸 Day complete — be proud of yourself.</div>
 </section>
 
 <footer>
@@ -191,23 +239,23 @@
 </footer>
 
 <div class="toast" id="toast"></div>
+<canvas id="fx" class="fx"></canvas>
 
 <script>
 // ---- Challenge config -------------------------------------------------
 const HABITS = [
   { id: "food",     emoji: "🥗", label: "Food" },
-  { id: "exercise", emoji: "🏃", label: "Exercise" },
+  { id: "exercise", emoji: "🚶", label: "Exercise" },
   { id: "skincare", emoji: "🧴", label: "Skin care" },
 ];
 
-// A unique focus for each of the 21 days
 const FOCUS = [
-  "Just show up", "Hydrate first thing", "Move your body", "Stretch 5 minutes",
-  "Eat the rainbow", "Take the stairs", "Walk after a meal", "Cut one sugary drink",
-  "Breathe — 4×4 box breathing", "Get 10 min of sunlight", "Cook one home meal",
-  "Stand every hour", "Try a new veggie", "Lights out, no phone", "Add 1,000 steps",
-  "Plan tomorrow's meals", "Do 20 squats", "Drink water before coffee", "10-min mobility",
-  "Reflect on your wins", "Finish strong 💪",
+  "Just begin, gently", "Hydrate first thing", "Move your body", "Stretch for five minutes",
+  "Eat something colorful", "Take the slow path", "Walk after a meal", "Ease off one sugary drink",
+  "Breathe — slow 4×4", "Find ten minutes of sunlight", "Cook one calm meal",
+  "Stand and reset each hour", "Try a new vegetable", "Wind down, screen-free", "Add a gentle thousand steps",
+  "Plan tomorrow softly", "A little strength today", "Water before coffee", "Slow, mindful mobility",
+  "Notice how far you've come", "Finish with grace 🌿",
 ];
 
 const STORAGE_KEY = "h21_v1";
@@ -215,32 +263,16 @@ const TOTAL = 21;
 const DAY_MS = 86400000;
 
 // ---- State ------------------------------------------------------------
-function todayStr(d = new Date()) {
-  d.setHours(0,0,0,0); return d.getTime();
-}
-function load() {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || null; } catch { return null; }
-}
+function todayStr(d = new Date()) { d.setHours(0,0,0,0); return d.getTime(); }
+function load() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || null; } catch { return null; } }
 function save(s) { localStorage.setItem(STORAGE_KEY, JSON.stringify(s)); }
 
 let state = load();
-if (!state) {
-  state = { start: todayStr(), days: {} }; // days: { "1": {habits:{}, note:""} }
-  save(state);
-}
+if (!state) { state = { start: todayStr(), days: {} }; save(state); }
 
-// current day number based on calendar; clamp 1..21
-// Self-paced: the "active" day is the first day you haven't completed yet.
-function activeDay() {
-  for (let i = 1; i <= TOTAL; i++) if (!isDayComplete(i)) return i;
-  return TOTAL;
-}
-// A day is reachable if it's at/before the active day, or already completed.
-function unlocked(n) { return n >= 1 && n <= TOTAL && (n <= activeDay() || isDayComplete(n)); }
-let viewDay = activeDay();
-
+// ---- Day helpers ------------------------------------------------------
 function dayData(n) {
-  if (!state.days[n]) state.days[n] = { habits: {}, priority: "", reflect: "", grateful: "" };
+  if (!state.days[n]) state.days[n] = { habits: {}, priority: "", meal: "", reflect: "", grateful: "" };
   return state.days[n];
 }
 function isDayComplete(n) {
@@ -248,25 +280,31 @@ function isDayComplete(n) {
   if (!d) return false;
   return HABITS.every(h => d.habits[h.id]);
 }
-function daysDone() {
-  let c = 0; for (let i=1;i<=TOTAL;i++) if (isDayComplete(i)) c++; return c;
-}
-function streak() {
-  // consecutive completed days ending at the most recent completed day
-  let best = 0, run = 0;
-  for (let i=1;i<=TOTAL;i++){ if (isDayComplete(i)) { run++; best=Math.max(best,run);} else run=0; }
-  return best;
-}
+function daysDone() { let c=0; for (let i=1;i<=TOTAL;i++) if (isDayComplete(i)) c++; return c; }
+function streak() { let best=0,run=0; for (let i=1;i<=TOTAL;i++){ if (isDayComplete(i)){run++;best=Math.max(best,run);} else run=0; } return best; }
+
+// Self-paced: the "active" day is the first day you haven't completed yet.
+function activeDay() { for (let i=1;i<=TOTAL;i++) if (!isDayComplete(i)) return i; return TOTAL; }
+function unlocked(n) { return n>=1 && n<=TOTAL && (n <= activeDay() || isDayComplete(n)); }
+let viewDay = activeDay();
 
 // ---- Rendering --------------------------------------------------------
 const $ = s => document.querySelector(s);
+
+function animateNumber(el, to) {
+  const from = parseInt(el.textContent) || 0;
+  if (from === to) { el.textContent = to + "%"; return; }
+  const start = performance.now(), dur = 700;
+  function step(t){ const p=Math.min((t-start)/dur,1); const v=Math.round(from+(to-from)*(1-Math.pow(1-p,3))); el.textContent=v+"%"; if(p<1) requestAnimationFrame(step); }
+  requestAnimationFrame(step);
+}
 
 function renderHero() {
   const done = daysDone();
   const pct = Math.round((done/TOTAL)*100);
   $("#statDays").innerHTML = done + '<span style="font-size:13px;color:var(--muted)">/21</span>';
   $("#statStreak").textContent = streak();
-  $("#ringPct").textContent = pct + "%";
+  animateNumber($("#ringPct"), pct);
   const circ = 2 * Math.PI * 42;
   $("#ringFill").style.strokeDashoffset = circ * (1 - done/TOTAL);
 }
@@ -288,7 +326,9 @@ function renderGrid() {
   }
 }
 
-const check = '<svg viewBox="0 0 24 24" fill="none"><path d="M5 12l5 5L20 7" stroke="#04201c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const check = '<svg viewBox="0 0 24 24" fill="none"><path d="M5 12l5 5L20 7" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+let justChecked = null;
+let lastDay = null;
 
 function renderDay() {
   const n = viewDay;
@@ -300,31 +340,37 @@ function renderDay() {
   $("#next").disabled = !unlocked(n + 1);
 
   const d = dayData(n);
-  const wrap = $("#habits");
-  wrap.innerHTML = "";
+
+  const habitsWrap = $("#habits");
+  habitsWrap.innerHTML = "";
   HABITS.forEach(h => {
     const row = document.createElement("div");
-    row.className = "habit" + (d.habits[h.id] ? " on" : "");
+    row.className = "habit" + (d.habits[h.id] ? " on" : "") + (justChecked === h.id ? " just" : "");
     row.innerHTML = `<div class="box">${check}</div><span class="emoji">${h.emoji}</span><span class="label">${h.label}</span>`;
     row.onclick = () => {
       const wasComplete = isDayComplete(n);
+      const turningOn = !d.habits[h.id];
       d.habits[h.id] = !d.habits[h.id];
+      justChecked = turningOn ? h.id : null;
       save(state);
+      if (turningOn && navigator.vibrate) navigator.vibrate(12);
       renderHero(); renderGrid(); renderDay();
+      justChecked = null;
       if (isDayComplete(n) && !wasComplete) {
         celebrate();
-        // Self-paced: jump to the next day once today is done.
-        if (n < TOTAL) {
-          setTimeout(() => { viewDay = n + 1; renderDay(); renderGrid(); }, 850);
-        }
+        if (n < TOTAL) setTimeout(() => { viewDay = n + 1; renderDay(); renderGrid(); }, 1000);
       }
     };
-    wrap.appendChild(row);
+    habitsWrap.appendChild(row);
   });
 
   const priority = $("#priority");
   priority.value = d.priority || "";
   priority.oninput = () => { d.priority = priority.value; save(state); };
+
+  const meal = $("#meal");
+  meal.value = d.meal || "";
+  meal.oninput = () => { d.meal = meal.value; save(state); };
 
   const reflect = $("#reflect");
   reflect.value = d.reflect || "";
@@ -335,24 +381,92 @@ function renderDay() {
   grateful.oninput = () => { d.grateful = grateful.value; save(state); };
 
   $("#banner").classList.toggle("show", isDayComplete(n));
+
+  // gentle slide when the day changes
+  if (lastDay !== null && lastDay !== n) {
+    const card = $("#todayCard");
+    const dir = n > lastDay ? "slide-r" : "slide-l";
+    card.classList.remove("slide-l","slide-r"); void card.offsetWidth; card.classList.add(dir);
+  }
+  lastDay = n;
+}
+
+// ---- Calm celebration: floating petals + soft chime -------------------
+function petals() {
+  const c = $("#fx"), ctx = c.getContext("2d");
+  const dpr = window.devicePixelRatio || 1;
+  c.width = innerWidth * dpr; c.height = innerHeight * dpr; ctx.scale(dpr, dpr);
+  const colors = ["#3f7a64", "#b8924a", "#e8e2d2", "#2f5d4f", "#cdbf9a"];
+  const N = 26, parts = [];
+  for (let i=0;i<N;i++){
+    parts.push({
+      x: innerWidth * (0.2 + Math.random()*0.6),
+      y: innerHeight + 20 + Math.random()*60,
+      vy: -(0.7 + Math.random()*1.1),
+      sway: 0.6 + Math.random()*1.2, phase: Math.random()*6.28,
+      r: 4 + Math.random()*5, color: colors[i % colors.length],
+      life: 0, max: 180 + Math.random()*80,
+    });
+  }
+  function frame(){
+    ctx.clearRect(0,0,c.width,c.height);
+    let alive = false;
+    parts.forEach(p => {
+      if (p.life > p.max || p.y < -20) return;
+      alive = true; p.life++;
+      p.y += p.vy; p.x += Math.sin((p.life*0.03) + p.phase) * p.sway;
+      const a = Math.max(0, Math.min(1, 1 - p.life/p.max)) * 0.8;
+      ctx.globalAlpha = a; ctx.fillStyle = p.color;
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, 6.2832); ctx.fill();
+    });
+    if (alive) requestAnimationFrame(frame); else ctx.clearRect(0,0,c.width,c.height);
+  }
+  frame();
+}
+
+let actx;
+function chime() {
+  try {
+    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+    const now = actx.currentTime;
+    // soft, low major arpeggio — singing-bowl feel
+    [392.00, 523.25, 659.25].forEach((f, i) => {
+      const o = actx.createOscillator(), g = actx.createGain();
+      o.type = "sine"; o.frequency.value = f;
+      o.connect(g); g.connect(actx.destination);
+      const t = now + i * 0.16;
+      g.gain.setValueAtTime(0, t);
+      g.gain.linearRampToValueAtTime(0.12, t + 0.08);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 1.1);
+      o.start(t); o.stop(t + 1.2);
+    });
+  } catch (e) {}
 }
 
 function celebrate() {
-  const t = $("#toast");
-  const done = daysDone();
-  t.textContent = done === TOTAL ? "🏆 Challenge complete!" : "✅ Day " + viewDay + " done!";
-  t.classList.add("show");
-  if (navigator.vibrate) navigator.vibrate(40);
-  setTimeout(() => t.classList.remove("show"), 1600);
+  const t = $("#toast"), done = daysDone();
+  let msg = "🌸 Day " + viewDay + " complete";
+  if (done === TOTAL) msg = "🌿 All 21 days — beautifully done, Valen.";
+  else if (done === 7) msg = "🌱 One week in. Keep flowing.";
+  else if (done === 14) msg = "🌼 Two weeks — you're glowing.";
+  t.textContent = msg; t.classList.add("show");
+  if (navigator.vibrate) navigator.vibrate([18, 50, 18]);
+  petals(); chime();
+  const card = $("#todayCard"); card.classList.remove("breathe"); void card.offsetWidth; card.classList.add("breathe");
+  const cell = document.querySelectorAll("#grid .cell")[viewDay-1];
+  if (cell) { cell.classList.remove("justdone"); void cell.offsetWidth; cell.classList.add("justdone"); }
+  const fl = document.querySelector(".flame"); if (fl) { fl.classList.remove("bump"); void fl.offsetWidth; fl.classList.add("bump"); }
+  setTimeout(() => t.classList.remove("show"), 2100);
 }
 
+// ---- Navigation -------------------------------------------------------
 $("#prev").onclick = () => { if (viewDay > 1) { viewDay--; renderDay(); renderGrid(); } };
 $("#next").onclick = () => { if (unlocked(viewDay + 1)) { viewDay++; renderDay(); renderGrid(); } };
 
 $("#reset").onclick = () => {
   if (confirm("Reset the whole challenge and start over from Day 1?")) {
     state = { start: todayStr(), days: {} };
-    save(state); viewDay = 1; renderAll();
+    save(state); viewDay = 1; lastDay = null; renderAll();
   }
 };
 
@@ -366,9 +480,7 @@ function renderAll() { renderHero(); renderGrid(); renderDay(); renderDateRange(
 renderAll();
 
 // ---- Service worker (offline) ----------------------------------------
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("sw.js").catch(()=>{});
-}
+if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(()=>{});
 </script>
 </body>
 </html>

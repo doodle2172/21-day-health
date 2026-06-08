@@ -1,4 +1,4 @@
-const CACHE = "h21-v5";
+const CACHE = "h21-v8";
 const ASSETS = [
   "./",
   "./index.html",
