@@ -649,10 +649,11 @@ function renderDay() {
   const active = activeDay();
   const d = dayData(n);
   $("#dayLabel").textContent = "Day " + n;
-  let suffix;
-  if (isDayComplete(n)) suffix = " · Done ✓" + (d.completedAt ? " · " + fmtDate(d.completedAt) : "");
-  else if (n === active) suffix = " · Today · " + fmtDate(Date.now());
-  else suffix = "";
+  // Each day maps to a real calendar date that progresses from the start (Day 1 = start).
+  const scheduled = state.start + (n - 1) * DAY_MS;
+  let suffix = " · " + fmtDate(scheduled);
+  if (isDayComplete(n)) suffix += " · Done ✓";
+  else if (scheduled === todayStr()) suffix += " · Today";
   $("#dayTitle").textContent = "Day " + n + suffix;
   $("#dayFocus").textContent = FOCUS[n-1];
   $("#prev").disabled = n <= 1;
@@ -1107,7 +1108,7 @@ function renderReview() {
     const d = state.days[i];
     if (!d) continue;
     const text = [d.reflect, d.grateful].filter(Boolean).join(" · ");
-    if (text) collected.push({ i, text, when: d.completedAt });
+    if (text) collected.push({ i, text, when: state.start + (i - 1) * DAY_MS });
   }
   if (!collected.length) { notes.innerHTML = '<div class="rv-empty">Your notes and gratitude will show here.</div>'; }
   else collected.forEach(n => {
