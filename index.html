@@ -84,12 +84,10 @@
   .grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin: 2px 0 18px; }
   .cell {
     aspect-ratio: 1; border-radius: 14px; border:1px solid var(--line);
-    background: rgba(255,255,255,.55); display:flex; flex-direction:column; align-items:center; justify-content:center;
-    color: var(--muted); cursor: pointer;
+    background: rgba(255,255,255,.55); display: grid; place-items: center;
+    font-size: 13px; font-weight: 600; color: var(--muted); cursor: pointer;
     transition: transform .12s ease, background .3s ease, color .3s ease;
   }
-  .cell .cn { font-size: 13px; font-weight: 600; line-height: 1.05; }
-  .cell .cw { font-size: 8px; font-weight: 600; opacity: .72; text-transform: uppercase; letter-spacing: .2px; margin-top: 1px; }
   .cell:active { transform: scale(.92); }
   .cell.done { background: linear-gradient(160deg, var(--sage), var(--sage-deep)); color:#fff; border-color: transparent; box-shadow: 0 4px 12px rgba(127,171,152,.3); }
   .cell.today { border-color: var(--accent); color: var(--accent-deep); }
@@ -587,11 +585,7 @@ function renderGrid() {
   for (let i=1;i<=TOTAL;i++){
     const c = document.createElement("div");
     c.className = "cell";
-    // weekday label: completion date for done days, today for the active day
-    let wd = "";
-    if (state.days[i] && state.days[i].completedAt) wd = weekdayShort(state.days[i].completedAt);
-    else if (i === active) wd = weekdayShort(Date.now());
-    c.innerHTML = `<span class="cn">${i}</span>` + (wd ? `<span class="cw">${wd}</span>` : "");
+    c.textContent = i;
     if (isDayComplete(i)) c.classList.add("done");
     if (i === active) c.classList.add("today");
     if (i === viewDay) c.classList.add("viewing");
